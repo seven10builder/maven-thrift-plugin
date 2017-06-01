@@ -23,7 +23,9 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 
@@ -32,8 +34,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+
+
+
 public class TestThrift {
 
+	@Rule
+	public TemporaryFolder folder= new TemporaryFolder();
+	
     private File testRootDir;
     private File idlDir;
     private File genJavaDir;
@@ -41,8 +49,7 @@ public class TestThrift {
 
     @Before
     public void setup() throws Exception {
-        final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-        testRootDir = new File(tmpDir, "thrift-test");
+        testRootDir = folder.newFolder("thrift-test");
 
         if (testRootDir.exists()) {
             FileUtils.cleanDirectory(testRootDir);
@@ -68,7 +75,7 @@ public class TestThrift {
 
     @Test
     public void testThriftCompileWithGeneratorOption() throws Exception {
-        builder.setGenerator("java:private-members,hashcode");
+        builder.setGenerator("java:private-members");
         executeThriftCompile();
     }
 
