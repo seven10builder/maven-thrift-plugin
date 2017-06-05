@@ -10,7 +10,7 @@
     <url>https://github.com/dtrott/maven-thrift-plugin</url>
 
     <prerequisites>
-        <maven>2.0.6</maven>
+        <maven>3.2</maven>
     </prerequisites>
 
     <licenses>
