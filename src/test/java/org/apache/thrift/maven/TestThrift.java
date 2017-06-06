@@ -91,6 +91,7 @@ public class TestThrift {
 
         // execute the compile
         final int result = thrift.compile();
+        System.out.print(String.format("thrift output: " + thrift.getOutput()));
         assertEquals(0, result);
 
         assertFalse("gen-java directory was not removed", genJavaDir.exists());
@@ -113,6 +114,7 @@ public class TestThrift {
 
         // execute the compile
         final int result = thrift.compile();
+        System.out.print(String.format("thrift output: " + thrift.getOutput()));
         assertEquals(0, result);
 
         assertFalse("gen-java directory was not removed", genJavaDir.exists());
@@ -139,7 +141,8 @@ public class TestThrift {
 
         // execute the compile
         final int result = thrift.compile();
-        assertEquals(1, result);
+        System.out.print(String.format("thrift output: " + thrift.getOutput()));
+        assertEquals(Thrift.THRIFT_IO_EXCEPTION, result);
     }
 
     @Test
@@ -152,14 +155,6 @@ public class TestThrift {
             builder.addThriftFile(thriftFile);
             fail("Expected IllegalStateException");
         } catch (IllegalStateException e) {
-        }
-    }
-
-    @After
-    public void cleanup() throws Exception {
-        if (testRootDir.exists()) {
-            FileUtils.cleanDirectory(testRootDir);
-            assertTrue("Failed to delete output directory for test: " + testRootDir.getPath(), testRootDir.delete());
         }
     }
 }

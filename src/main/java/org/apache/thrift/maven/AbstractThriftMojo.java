@@ -190,11 +190,12 @@ abstract class AbstractThriftMojo extends AbstractMojo {
                             .addThriftFiles(thriftFiles)
                             .build();
                     final int exitStatus = thrift.compile();
+                    getLog().info("thrift output: " + thrift.getOutput());
                     if (exitStatus != 0) {
-                        getLog().error("thrift failed output: " + thrift.getOutput());
+                        
                         getLog().error("thrift failed error: " + thrift.getError());
-                        throw new MojoFailureException(
-                                "thrift did not exit cleanly. Review output for more information.");
+                        throw new MojoFailureException(String.format(
+                                "thrift did not exit cleanly (error code '%d'). Review output for more information.", exitStatus));
                     }
                     attachFiles();
                 }

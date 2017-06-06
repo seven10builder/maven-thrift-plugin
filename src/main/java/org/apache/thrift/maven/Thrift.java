@@ -23,11 +23,13 @@ import com.google.common.collect.ImmutableSet;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,6 +53,8 @@ import static com.google.common.collect.Sets.newHashSet;
 final class Thrift
 {
 	
+
+	public static final int THRIFT_IO_EXCEPTION = 1111;
 
 	final static String GENERATED_JAVA = "gen-java";
 	
@@ -105,38 +109,40 @@ final class Thrift
     		CommandLine cmdLine = CommandLine.parse(executable).addArguments(paramList.toArray(new String[]{}));
     		
     		DefaultExecutor exec = new DefaultExecutor();
-    		exec.setExitValue(0);
     		
+			// set up output stream to capture
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
+			exec.setStreamHandler(streamHandler);
+    		exec.setExitValue(0);
 			try
 			{
 				Map<String, String> env = EnvironmentUtils.getProcEnvironment();
-				env.put("LD_LIBRARY_PATH", "/usr/local/lib/");
+				// make sure *nix systems can find their libs
+				if(System.getProperty("os.name").toLowerCase().indexOf("nux") >= 0)
+				{
+					env.put("LD_LIBRARY_PATH", "/usr/local/lib/");
+				}
 				int result = exec.execute(cmdLine, env);
 				if(result != 0)
 	    		{
+					output.consumeLine(String.format("Thrift execution error: %d, Reason: %s", result, outputStream.toString()));
 	    			return result;
 	    		}
+				else
+				{
+					output.consumeLine(String.format("Thrift file '%s' processed successfuly", thriftFile.getName()));
+				}
 			}
 			catch (IOException e)
 			{
+				error.consumeLine(String.format("IOException: %s", e.getMessage()));
+				error.consumeLine(outputStream.toString());
 				e.printStackTrace();
-				return 1;
+				return THRIFT_IO_EXCEPTION;
 			}
     		
     	}
-    	
-//        for (File thriftFile : thriftFiles) {
-//            Commandline cl = new Commandline();
-//            cl.setExecutable(executable);
-//            cl.addArguments(buildThriftCommand(thriftFile).toArray(new String[]{}));
-//            final int result = CommandLineUtils.executeCommandLine(cl, null, output, error);
-//
-//            if (result != 0) {
-//                return result;
-//            }
-//        }
-
-        // result will always be 0 here.
         return 0;
     }
 	
